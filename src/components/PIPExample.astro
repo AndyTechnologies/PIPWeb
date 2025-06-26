@@ -1,0 +1,251 @@
+---
+import QuitPIP from "@/assets/quit-pip-svgrepo-com.svg"
+import ToPIP from "@/assets/to-pip-svgrepo-com.svg"
+
+const { videoID } = Astro.props
+
+---
+
+<div id="contents">
+    <div id="container">
+        <button type="button" id="quit-pip" class="pip-btn" >
+            <QuitPIP />
+        </button>
+        <div id="player" transition:name="video-player" transition:persist>
+            <div id="controlbar">
+                <p class="no-picture-in-picture">
+                    <a href="https://caniuse.com/picture-in-picture"> Visita CAN I USE para saber si tu navegador soporta la Picture In Picture API</a>
+                </p>
+                <button type="button" id="to-pip" class="pip-btn">
+                    <ToPIP />
+                </button>
+            </div>
+            <lite-youtube style="view-transition-name: elmnt-search;" videoid={videoID} posterquality="sddefault">
+                <a href=`https://www.youtube.com/watch?v=${videoID}`>Hubo un error al cargar el vídeo, vaya a Youtube a verlo</a>
+            </lite-youtube>
+        </div>
+    </div>
+</div>
+
+<style>
+
+:root{
+    color-scheme: light dark;
+}
+
+#contents {
+    width: 100%;
+    height: 100%;
+    
+    font:
+        14px "Open Sans",
+        sans-serif;
+}
+
+#container{
+    width: 100%;
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+p{
+    margin: 0;
+    padding: 2px 0;
+}
+
+#player{
+    background: transparent;
+    border-radius: 6px;
+    padding-inline: 2px;
+    padding-block: 3px;
+    width: 100%;
+    max-width: calc(100vw - 100px);
+    min-width: 240px;
+
+    height: 56.25vw;
+    max-height: calc(100vh - 169px);
+    min-height: 480px;
+
+    & #controlbar{
+        max-width: fit-content;
+        width: 100%;
+        height: min-content;
+        border-radius: 4px;
+        margin: 1px;
+        position: relative;
+        z-index: -9999;
+        visibility: hidden;
+        left: .5rem;
+        top: 1.5rem;
+    };
+    & #controlbar:hover + lite-youtube{
+        filter: blur(0.6px);
+    };
+    &:hover #controlbar{
+        visibility: visible;
+        z-index: 9999;
+        & .pip-btn svg{
+            transform: scale(1.5);
+            fill: black;
+        }
+    };
+}
+
+.pip-btn{
+    padding: 1px;
+    background: transparent;
+    border-radius: 4px;
+    border: 0px solid transparent;
+    
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    & svg{
+        width: 24px;
+        height: 24px;
+        margin: 0;
+        padding: 0;
+        transition: all 1s ease;
+        fill: black;
+    };
+    &:hover{
+        transform: scale(1.05);
+        background-color: #fff2;
+        & svg{
+            transform: scale(1.5);
+        }
+    };
+    &[id="quit-pip"]{
+        display: none;
+    }
+}
+
+@media (prefers-color-scheme: light){
+    #player:hover #controlbar .pip-btn svg{
+        fill: white;
+    }
+}
+
+@media (hover:none), (hover:on-demand), (pointer: coarse){
+    @media (prefers-color-scheme: light){
+        #player #controlbar .pip-btn svg{
+            fill: white;
+        }
+    }
+    
+    .pip-btn[id="to-pip"]{
+        display: flex;
+    }
+
+    #player #controlbar{
+        visibility: visible;
+        z-index: 9999;
+        position: relative;
+        left: .5rem;
+        top: 1.3rem;
+        & .pip-btn svg{
+            transform: scale(1.5);
+            fill: black;
+        }
+    }
+
+}
+
+@media (display-mode: picture-in-picture){
+    #player{
+        padding-inline: 0;
+        padding-block: 0;
+
+        &:hover #controlbar{
+            display: none;
+        }
+        & lite-youtube{
+            min-width: 640px;
+            min-height: 480px;
+            aspect-ratio: 640 / 480;
+        }
+    }
+
+    .pip-btn{
+        &[id="to-pip"]{
+            display: none;
+        };
+    }
+}
+
+</style>
+
+<script is:inline>
+
+const videoPlayer = document.getElementById("player");
+const playerContainer = document.getElementById("container");
+const bar = document.getElementById("controlbar");
+const toPIP = bar.querySelector("button[id='to-pip']")
+const quitPIP = document.querySelector("button[id='quit-pip']")
+
+if ("documentPictureInPicture" in window) {
+    bar.querySelector(".no-picture-in-picture").remove();
+    toPIP.addEventListener("click", onPictureInPicture);
+    quitPIP.addEventListener("click", quitPictureInPicture);
+}else{
+    bar.querySelectorAll("button[id]").forEach(v => v.remove());
+}
+
+async function onPictureInPicture(){
+    // Si no hay una ventana en modo picture-in-picture
+    if (!document.pictureInPictureElement && document.pictureInPictureEnabled){
+        const pipWindow = await window.documentPictureInPicture.requestWindow({
+            width: 640,
+            height: 480,
+        });
+
+        pipWindow.addEventListener("pagehide", () => {
+            quitPictureInPicture();
+        });
+
+        copyStyleSheets(pipWindow);
+
+        // Move the player to the Picture-in-Picture window.
+        quitPIP.style.display = "flex";
+        pipWindow.document.body.append(videoPlayer);
+    }
+}
+
+async function quitPictureInPicture(){
+    if (window.documentPictureInPicture.window) {
+        playerContainer.append(videoPlayer);
+        window.documentPictureInPicture.window.close();
+        quitPIP.style.display = "none";
+    }
+}
+
+async function copyStyleSheets(pipWindow){
+    [...document.styleSheets].forEach((styleSheet) => {
+        try {
+            const cssRules = [...styleSheet.cssRules]
+                .map((rule) => rule.cssText)
+                .join("");
+            const style = document.createElement("style");
+
+            style.textContent = cssRules;
+            pipWindow.document.head.appendChild(style);
+        } catch (e) {
+            const link = document.createElement("link");
+
+            link.rel = "stylesheet";
+            link.type = styleSheet.type;
+            link.media = styleSheet.media;
+            link.href = styleSheet.href;
+            pipWindow.document.head.appendChild(link);
+        }
+    });
+}
+
+
+</script>

@@ -1,22 +1,80 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="generator" content={Astro.generator} />
 		<title>Astro Basics</title>
+		<meta name="description" content="Ver vídeos de Youtube en modo Picture in Picture (PIP) de forma gratuita nunca fue tan fácil y sencillo!" />
+		<meta name="keywords" content="pip, PictureInPicture, youtube, yt, ytpip, online, gratis">
+		<meta name="robots" content="nofollow, index" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<script is:inline type="module" src="https://cdn.jsdelivr.net/npm/@justinribeiro/lite-youtube@1/lite-youtube.min.js"></script>
 	</head>
 	<body>
 		<slot />
 	</body>
 </html>
 
-<style>
-	html,
-	body {
+<style is:global>
+	@view-transition{
+		navigation: auto;
+	}
+
+	::view-transition-group(*){
+		animation-duration: 2s;
+	}
+
+	::view-transition-old(root){
+		animation: slide-out-to-left 1s forwards;
+	}
+
+	::view-transition-new(root){
+		animation: slide-in-from-right 1s forwards;
+	}
+
+	@keyframes slide-out-to-left {
+		from{
+			transform: translateX(0);
+		}
+		to{
+			transform: translateX(-100%);
+		}
+	}
+
+	@keyframes slide-in-from-right {
+		from{
+			transform: translateX(100%);
+		}
+		to{
+			transform: translateX(0);
+		}
+	}
+
+	:root{
+		color-scheme: light dark;
+	}
+	html, body{
 		margin: 0;
-		width: 100%;
-		height: 100%;
+		padding: 0;
+		width: 100vw;
+		height: 100dvh;
+		overflow: hidden;
+	}
+
+	*, *::after, *::before{
+		box-sizing: border-box;
+	}
+
+	body{
+		background: #1c1c2e;
+		background: linear-gradient(25deg,rgba(28, 28, 46, 1) 0%, rgba(43, 44, 64, 1) 30%, rgba(24, 28, 64, 1) 80%, rgba(19, 24, 43, 1) 100%);
+		background-repeat: no-repeat;
+	}
+
+	@media (prefers-color-scheme: light){
+		body{
+			background: #a5adad;
+			background: linear-gradient(5deg, rgba(165, 173, 173, 1) 0%, rgba(219, 219, 219, 1) 100%);
+		}
 	}
 </style>

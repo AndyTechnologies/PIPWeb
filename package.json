@@ -6,9 +6,13 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "start": "node ./server.js"
   },
   "dependencies": {
-    "astro": "^5.10.1"
+    "@astrojs/node": "^9.2.2",
+    "@justinribeiro/lite-youtube": "^1.8.2",
+    "astro": "5.10.1",
+    "express": "5.1.0"
   }
 }
