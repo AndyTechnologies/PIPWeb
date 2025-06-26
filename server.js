@@ -5,7 +5,7 @@ const app = express();
 const base = '/'
 app.use(base, express.static('dist/client/'));
 app.use((req, res, next) => {  
-    ssrHandler(req, res, next, locals);
+    ssrHandler(req, res, next);
 });
 
 app.listen(process.env.PORT || 8080, (error) => {
