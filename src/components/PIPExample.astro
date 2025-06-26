@@ -90,7 +90,7 @@ p{
         z-index: 9999;
         & .pip-btn svg{
             transform: scale(1.5);
-            fill: black;
+            fill: #464BD8;
         }
     };
 }
@@ -112,7 +112,7 @@ p{
         margin: 0;
         padding: 0;
         transition: all 1s ease;
-        fill: black;
+        fill: #464BD8;
     };
     &:hover{
         transform: scale(1.05);
@@ -126,19 +126,7 @@ p{
     }
 }
 
-@media (prefers-color-scheme: light){
-    #player:hover #controlbar .pip-btn svg{
-        fill: white;
-    }
-}
-
 @media (hover:none), (hover:on-demand), (pointer: coarse){
-    @media (prefers-color-scheme: light){
-        #player #controlbar .pip-btn svg{
-            fill: white;
-        }
-    }
-    
     .pip-btn[id="to-pip"]{
         display: flex;
     }
@@ -151,7 +139,7 @@ p{
         top: 1.3rem;
         & .pip-btn svg{
             transform: scale(1.5);
-            fill: black;
+            fill: #464BD8;
         }
     }
 
