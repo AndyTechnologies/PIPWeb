@@ -2,6 +2,7 @@
   "name": "pipweb",
   "type": "module",
   "version": "0.0.1",
+  "license": "MIT",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
@@ -10,8 +11,8 @@
     "start": "node ./server.js"
   },
   "dependencies": {
-    "@astrojs/node": "^9.2.2",
-    "@justinribeiro/lite-youtube": "^1.8.2",
+    "@astrojs/node": "9.2.2",
+    "@justinribeiro/lite-youtube": "1.8.2",
     "astro": "5.10.1",
     "express": "5.1.0"
   }
