@@ -5,6 +5,9 @@ import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
+  server: {
+    host: '0.0.0.0'
+  },
   prefetch: {
     prefetchAll: true,
     defaultStrategy: 'viewport',
