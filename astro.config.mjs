@@ -12,7 +12,6 @@ export default defineConfig({
     clientPrerender: true,
   },
   site: 'https://andytechnologies.github.io/',
-  base: '/PIPWeb',
   integrations: [sitemap({
     i18n: {
       defaultLocale: 'es',
