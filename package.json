@@ -15,5 +15,6 @@
     "@astrojs/sitemap": "3.4.1",
     "astro": "5.10.1",
     "express": "5.1.0"
-  }
+  },
+  "packageManager": "pnpm@10.7.0"
 }
