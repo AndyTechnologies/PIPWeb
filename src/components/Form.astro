@@ -1,0 +1,223 @@
+---
+import SearchIconWhite from '@/assets/light-search.svg'
+import SearchIconDark from '@/assets/dark-search.svg'
+import BackspaceIcon from '@/assets/backspace.svg'
+import PaperIconWhite from '@/assets/paper-round.svg'
+import PaperIconDark from '@/assets/paper.svg'
+
+import { getLangFromUrl, useTranslations, useTranslatedPath } from '@/i18n/utils';
+const lang = getLangFromUrl(Astro.url);
+const translater = useTranslatedPath(lang);
+const t = useTranslations(lang);
+---
+
+<form action="#" data-url={translater("/video", lang)}>
+    <button type="button" id="paste">
+        <PaperIconWhite class="icon i-white" />
+        <PaperIconDark  class="icon i-dark" />
+    </button>
+    <input autofocus required type="url" name="video-url" id="video-url" placeholder={t('index.search-input.placeholder')}>
+    <button type="button" id="deleter">
+        <BackspaceIcon class="icon" />
+    </button>
+    <button type="submit" style="view-transition-name: elmnt-search;">
+        <SearchIconWhite class="icon i-white" />
+        <SearchIconDark  class="icon i-dark" />
+    </button>
+</form>
+
+<style>
+    button#paste{
+		border-radius: 8px;
+		border: 1px solid #1d243b;
+		padding: 2px;
+		& svg{
+			padding: 0;
+			margin: 0;
+			fill: #1f365f;
+		}
+		&:hover{
+			transform: scale(1.1);
+			filter: blur(0.4);
+			border-color: #464BD8;
+			& svg{
+				fill: #464BD8;
+			}
+		}
+	}
+
+	button#deleter{
+		& svg{
+			padding: 0;
+			margin: 0;
+			fill: #501b1b;
+		}
+		&:hover{
+			transform: scale(1.1);
+			filter: blur(0.4);
+			& svg{
+				fill: #720808;
+			}
+		}
+	}
+
+	.icon{
+		max-width: 32px;
+		max-height: 32px;
+		&.i-white{
+			display: none;
+		};
+		&.i-dark{
+			display: block;
+		}
+	}
+
+
+    form{
+        max-width: 600px;
+        width: 100%;
+        height: max-content;
+
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        
+        gap: 5px;
+        padding: 5px;
+
+        border-radius: 8px;
+        border: 1px solid #a5adad;
+
+        background: #1c1c2e;
+        background: linear-gradient(5deg, rgba(28, 28, 46, 1) 0%, rgba(19, 24, 43, 1) 100%);
+
+        & input{
+            background: transparent;
+            border: 1px solid transparent;
+            text-align: center;
+            outline: none;
+            width: 100%;
+            transition: all 2s;
+            &:hover, &:focus {
+                border-bottom: 1px solid #464BD8;
+            }
+        };
+        & button{
+            background: transparent;
+            border: 1px solid transparent;
+            margin: 4px;
+            border-radius: 8px;
+            transition: all 1s;
+            &[type="submit"]{
+                border-color: #f9fffe3a;
+            }
+        };
+        & button[type="submit"]:hover {
+            border-color: #464BD8;
+            transform: scale(1.2);
+            filter: blur(0.4);
+        };
+    }
+
+
+@media (prefers-color-scheme: light){
+    .icon{
+        &.i-white{
+            display: block;
+        };
+        &.i-dark{
+            display: none;
+        }
+    }
+
+    button#paste{
+        border-color: #6f9eb150;
+        & svg{
+            padding: 0;
+            margin: 0;
+            fill: #6f9eb1;
+        }
+        &:hover{
+            transform: scale(1.1);
+            filter: blur(0.4);
+            border-color: #4fa5c7;
+            & svg{
+                fill: #78B9D2;
+            }
+        }
+    }
+
+    form{
+        background: #d9d9d9;
+        background: linear-gradient(5deg, rgba(217, 217, 217, 1) 0%, rgba(255, 255, 255, 1) 100%);
+        & input{
+            color: #333;
+            &:hover, &:focus {
+                border-bottom: 1px solid #A9DCF0;
+            }
+        }
+        & button[type="submit"]{
+            border-color: #cfd4d450;
+        }
+        & button[type="submit"]:hover{
+            border-color: #5497af;
+        }
+    }
+}
+
+</style>
+
+
+<script type="module" is:inline >
+
+const form = document.querySelector("form");
+const { url } = form.dataset;
+const urlInput = form.querySelector("input[id='video-url']");
+const deleteButton = form.querySelector("button[id='deleter']")
+const pasteButton = form.querySelector("button[id='paste']");
+
+deleteButton.addEventListener("click", e => {
+	urlInput.value = "";
+})
+
+pasteButton.addEventListener("click", async () => {
+	try {
+		urlInput.value = await navigator.clipboard.readText();
+	} catch (_) {
+		urlInput.value = ""
+	}
+})
+
+form.addEventListener("submit", e => {
+	e.preventDefault();
+
+	try {
+		const uri = new URL(urlInput.value);
+		const host = uri.host;
+		let vid = "";
+
+
+		if(host.includes("youtube.com") && uri.searchParams.has("v")){
+			vid = uri.searchParams.get("v");
+		}else if(host.includes("youtu.be")){
+			const formed = uri.pathname.split("/");
+			vid = formed[formed.length -1];
+		}else if(uri.pathname.includes("shorts/")){
+			const formed = uri.pathname.split("/");
+			vid = formed[formed.length -1];
+		}else{
+			throw new Error("La url solicitada no es válida (asegúrese que es de youtube)");
+		}
+
+		const info = JSON.stringify({
+				vid
+		});
+		
+        window.location.href = `${url}/${btoa(info)}`
+	} catch (error) {
+		console.error(`Error validando la url: ${error}`)
+	}
+})
+
+</script>

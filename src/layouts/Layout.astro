@@ -1,14 +1,20 @@
+---
+import { getLangFromUrl, useTranslations } from '@/i18n/utils';
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+---
+
 <!doctype html>
-<html lang="es">
+<html lang={lang}>
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
-		<title>Picture in Piture Web</title>
-		<meta name="description" content="Ver vídeos de Youtube en modo Picture in Picture (PIP) de forma gratuita nunca fue tan fácil y sencillo!" />
-		<meta name="keywords" content="pip, PictureInPicture, youtube, yt, ytpip, online, gratis">
+		<title>{t('meta.title')}</title>
+		<meta name="description" content={t('meta.desc')} />
+		<meta name="keywords" content="pip, PictureInPicture, youtube, yt, ytpip, online, gratis, free, pipweb">
 		<meta name="robots" content="nofollow, index" />
+		<link rel="sitemap" href="/sitemap-index.xml" />
 		<link rel="icon" type="image/svg+xml" href="/favicon-pip.svg" />
-		<script is:inline type="module" src="https://cdn.jsdelivr.net/npm/@justinribeiro/lite-youtube@1/lite-youtube.min.js"></script>
 	</head>
 	<body>
 		<slot />

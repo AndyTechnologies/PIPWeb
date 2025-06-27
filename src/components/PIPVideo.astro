@@ -1,6 +1,19 @@
 ---
 import QuitPIP from "@/assets/quit-pip-svgrepo-com.svg"
 import ToPIP from "@/assets/to-pip-svgrepo-com.svg"
+import { getLangFromUrl, useTranslations } from '@/i18n/utils';
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+const errorMessages = {
+    code_2: t('error.message.2'),
+    code_5: t('error.message.5'),
+    code_100: t('error.message.100'),
+    code_101_150: t('error.message.101_150'),
+    unknown: t('error.unknown'),
+    autoplay: t('warn.auto-play'),
+    popup: t('warn.popup')
+};
 
 const { videoID } = Astro.props
 
@@ -14,15 +27,13 @@ const { videoID } = Astro.props
         <div id="player" transition:name="video-player" transition:persist>
             <div id="controlbar">
                 <p class="no-picture-in-picture">
-                    <a href="https://caniuse.com/picture-in-picture"> Visita CAN I USE para saber si tu navegador soporta la Picture In Picture API</a>
+                    <a href="https://caniuse.com/picture-in-picture">{t('pip.no-avaiable')}</a>
                 </p>
                 <button type="button" id="to-pip" class="pip-btn">
                     <ToPIP />
                 </button>
             </div>
-            <lite-youtube style="view-transition-name: elmnt-search;" videoid={videoID} posterquality="sddefault">
-                <a href=`https://www.youtube.com/watch?v=${videoID}`>Hubo un error al cargar el vídeo, vaya a Youtube a verlo</a>
-            </lite-youtube>
+            <div id="custom" data-videoid={videoID} ></div>
         </div>
     </div>
 </div>
@@ -48,7 +59,7 @@ const { videoID } = Astro.props
 
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: start;
     align-items: center;
 }
 
@@ -61,7 +72,7 @@ p{
     background: transparent;
     border-radius: 6px;
     padding-inline: 2px;
-    padding-block: 3px;
+    margin: 0;
     width: 100%;
     max-width: calc(100vw - 100px);
     min-width: 240px;
@@ -81,9 +92,6 @@ p{
         visibility: hidden;
         left: .5rem;
         top: 1.5rem;
-    };
-    & #controlbar:hover + lite-youtube{
-        filter: blur(0.6px);
     };
     &:hover #controlbar{
         visibility: visible;
@@ -126,6 +134,47 @@ p{
     }
 }
 
+#player[is-popup=true]{
+    padding-inline: 0;
+    padding-block: 0;
+
+    width: 100%;
+    height: 100%;
+    min-width: 240px;
+    max-width: 100%;
+    min-height: 480px;
+    max-height: 100%;
+
+    background: transparent;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    object-fit: cover;
+    
+    & #controlbar{
+        display: none;
+    }
+    & #custom{
+        object-fit: cover;
+        min-width: 240px;
+        min-height: 120px;
+        width: 100%;
+        height: 100%;
+    }
+    & .pip-btn{
+        &[id="to-pip"]{
+            display: none;
+        };
+    }
+}
+
+
 @media (hover:none), (hover:on-demand), (pointer: coarse){
     .pip-btn[id="to-pip"]{
         display: flex;
@@ -166,12 +215,14 @@ p{
 
         display: flex;
         flex-direction: column;
+        justify-content: center;
+        align-items: center;
         object-fit: cover;
         
-        &:hover #controlbar{
+        & #controlbar{
             display: none;
         }
-        & lite-youtube{
+        & #custom{
             object-fit: cover;
             min-width: 240px;
             min-height: 120px;
@@ -187,40 +238,120 @@ p{
 
 </style>
 
-<script is:inline>
+<script is:inline src="/pip-polyfill.js"></script>
+
+<script is:inline type="module" define:vars={{ errorMessages }}>
+
+const tag = document.createElement('script');
+tag.src = "https://www.youtube.com/iframe_api";
+const firstScriptTag = document.getElementsByTagName('script')[0];
+firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
 const videoPlayer = document.getElementById("player");
 const playerContainer = document.getElementById("container");
 const bar = document.getElementById("controlbar");
 const toPIP = bar.querySelector("button[id='to-pip']")
 const quitPIP = document.querySelector("button[id='quit-pip']")
+const customElement = document.querySelector("div#custom");
 
-if ("documentPictureInPicture" in window) {
-    bar.querySelector(".no-picture-in-picture").remove();
-    toPIP.addEventListener("click", onPictureInPicture);
-    quitPIP.addEventListener("click", quitPictureInPicture);
-}else{
-    bar.querySelectorAll("button[id]").forEach(v => v.remove());
+bar.querySelector(".no-picture-in-picture").remove();
+toPIP.addEventListener("click", onPictureInPicture);
+quitPIP.addEventListener("click", quitPictureInPicture);
+const { videoid, w = '640', h = '480' } = customElement.dataset;
+
+function parseError(data){
+    switch(data){
+        case 2:
+            return errorMessages['code_2'];
+        case 5:
+            return errorMessages['code_5'];
+        case 100:
+            return errorMessages['code_100'];
+        case 150:
+        case 101:
+            return errorMessages['code_101_150'];
+    }
+    return errorMessages['unknown'];
 }
 
-async function onPictureInPicture(){
-    // Si no hay una ventana en modo picture-in-picture
+let player, duration = undefined;
+function onYouTubeIframeAPIReady(){
+    player = new YT.Player('custom', {
+        width: w,
+        height: h,
+        videoId: videoid,
+        playerVars: {
+            'autoplay': 1,
+            'enablejsapi': 1,
+            'loop': 1,
+            'modestbranding': 1
+        },
+        events: {
+            'onReady': event => {
+                duration = duration ?? player?.getCurrentTime() ?? 0;
+                event.target.playVideo();
+                player?.playVideo();
+                event.target.seekTo(duration, true);
+                setInterval(() => { duration = player?.getCurrentTime() ?? 0; }, 1000)
+            },
+            'onError': event => {
+                const { data } = event;
+                let message = "Error: \n";
+                message += parseError(data);
+                alert(message);
+            },
+            'onAutoplayBlocked': () => {
+                console.warn(errorMessages['autoplay'])
+            }
+        }
+    });
+}
+
+// Load on window 
+window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
+
+async function createPopupWindow(){
+
     if (!document.pictureInPictureElement && document.pictureInPictureEnabled){
+        // PIP API enabled
         const pipWindow = await window.documentPictureInPicture.requestWindow({
             width: 640,
             height: 480,
         });
-
-        pipWindow.addEventListener("pagehide", () => {
-            quitPictureInPicture();
-        });
-
-        copyStyleSheets(pipWindow);
-
-        // Move the player to the Picture-in-Picture window.
-        quitPIP.style.display = "flex";
-        pipWindow.document.body.append(videoPlayer);
+        return pipWindow
+    }else{
+        // Popup Window
+        const popup = window.open(
+            '',
+            'Youtube PIP',
+            'width=640,height=480,resizable=yes,scrollbars=no,popup=yes'
+        );
+        if(!popup){
+            alert(errorMessages['popup']);
+        }else{
+            videoPlayer.setAttribute("is-popup", "true");
+        }
+        window.popupWindowElement = popup;
+        return popup;
     }
+}
+
+async function onPictureInPicture(){
+    const pipWindow = await createPopupWindow();
+    
+    pipWindow.addEventListener("pagehide", () => {
+        quitPictureInPicture();
+    });
+
+    copyStyleSheets(pipWindow);
+
+    // Move the player to the Picture-in-Picture window.
+    quitPIP.style.display = "flex";
+    if( window.popupWindowElement ){
+        toPIP.style.display = "none";
+    }
+    pipWindow.document.body.append(videoPlayer);
+    player?.seekTo(duration, true);
 }
 
 async function quitPictureInPicture(){
@@ -228,7 +359,14 @@ async function quitPictureInPicture(){
         playerContainer.append(videoPlayer);
         window.documentPictureInPicture.window.close();
         quitPIP.style.display = "none";
+    }else if(window.popupWindowElement){
+        playerContainer.append(videoPlayer);
+        window.popupWindowElement?.close();
+        videoPlayer.setAttribute("is-popup", "false");
+        quitPIP.style.display = "none";
+        toPIP.style.display = "flex";
     }
+    player?.seekTo(duration, true);
 }
 
 async function copyStyleSheets(pipWindow){
