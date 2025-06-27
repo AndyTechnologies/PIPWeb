@@ -1,26 +1,11 @@
 ---
 import PIPVideo from '@/components/PIPVideo.astro';
 import Layout from '@/layouts/Layout.astro';
-// SSR
-export const prerender = false;
-
-const { data = "" } = Astro.params;
-let video = "";
-
-try {
-	const { vid } = JSON.parse(
-		atob(data)
-	);
-	video = vid;
-} catch (error) {
-	Astro.redirect("/");
-}
-
 ---
 
 <Layout>
 	<div class="container">
-		<PIPVideo videoID={video} />
+		<PIPVideo />
 	</div>
 </Layout>
 

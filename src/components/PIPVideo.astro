@@ -15,8 +15,6 @@ const errorMessages = {
     popup: t('warn.popup')
 };
 
-const { videoID } = Astro.props
-
 ---
 
 <div id="contents">
@@ -33,7 +31,7 @@ const { videoID } = Astro.props
                     <ToPIP />
                 </button>
             </div>
-            <div id="custom" data-videoid={videoID} ></div>
+            <div id="custom" ></div>
         </div>
     </div>
 </div>
@@ -239,11 +237,13 @@ p{
 </style>
 
 <script is:inline src="/pip-polyfill.js"></script>
-
 <script is:inline type="module" define:vars={{ errorMessages }}>
 
+const urlSearchParams = new URLSearchParams(window.location.search);
+const { videoid = "" } = Object.fromEntries(urlSearchParams.entries());
+
 const tag = document.createElement('script');
-tag.src = "https://www.youtube.com/iframe_api";
+tag.src = "/iframe-api.js";
 const firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
@@ -257,7 +257,7 @@ const customElement = document.querySelector("div#custom");
 bar.querySelector(".no-picture-in-picture").remove();
 toPIP.addEventListener("click", onPictureInPicture);
 quitPIP.addEventListener("click", quitPictureInPicture);
-const { videoid, w = '640', h = '480' } = customElement.dataset;
+const { w = '640', h = '480' } = customElement.dataset;
 
 function parseError(data){
     switch(data){

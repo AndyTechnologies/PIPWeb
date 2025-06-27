@@ -210,11 +210,7 @@ form.addEventListener("submit", e => {
 			throw new Error("La url solicitada no es válida (asegúrese que es de youtube)");
 		}
 
-		const info = JSON.stringify({
-				vid
-		});
-		
-        window.location.href = `${url}/${btoa(info)}`
+        window.location.href = `${url}?videoid=${vid}`;
 	} catch (error) {
 		console.error(`Error validando la url: ${error}`)
 	}

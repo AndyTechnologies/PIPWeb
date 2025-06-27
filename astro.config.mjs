@@ -1,13 +1,9 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
-import node from '@astrojs/node';
 import sitemap from '@astrojs/sitemap';
 
 // https://astro.build/config
 export default defineConfig({
-  server: {
-    host: '0.0.0.0'
-  },
   prefetch: {
     prefetchAll: true,
     defaultStrategy: 'viewport',
@@ -15,10 +11,8 @@ export default defineConfig({
   experimental: {
     clientPrerender: true,
   },
-  adapter: node({
-    mode: 'standalone'
-  }),
-  site: 'https://pipweb.onrender.com',
+  site: 'https://andytechnologies.github.io/',
+  base: '/pipweb/',
   integrations: [sitemap({
     i18n: {
       defaultLocale: 'es',
