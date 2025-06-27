@@ -196,9 +196,9 @@ p{
         width: 100%;
         height: 100%;
         min-width: 120px;
-        max-width: 100%;
+        max-width: 1020px;
         min-height: 80px;
-        max-height: 100%;
+        max-height: 720px;
 
         background: transparent;
         position: absolute;
@@ -253,7 +253,7 @@ const customElement = document.querySelector("div#custom");
 bar.querySelector(".no-picture-in-picture").remove();
 toPIP.addEventListener("click", onPictureInPicture);
 quitPIP.addEventListener("click", quitPictureInPicture);
-const { w = "100%", h = "100%" } = customElement.dataset;
+const { w = "100%", h = "80%" } = customElement.dataset;
 
 function parseError(data){
     switch(data){
