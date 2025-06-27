@@ -236,14 +236,14 @@ p{
 
 </style>
 
-<script is:inline src="/PIPWeb/pip-polyfill.js"></script>
+<script is:inline src="/pip-polyfill.js"></script>
 <script is:inline type="module" define:vars={{ errorMessages }}>
 
 const urlSearchParams = new URLSearchParams(window.location.search);
 const { videoid = "" } = Object.fromEntries(urlSearchParams.entries());
 
 const tag = document.createElement('script');
-tag.src = "/PIPWeb/iframe-api.js";
+tag.src = "/iframe-api.js";
 const firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 

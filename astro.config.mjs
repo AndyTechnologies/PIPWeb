@@ -11,7 +11,7 @@ export default defineConfig({
   experimental: {
     clientPrerender: true,
   },
-  site: 'https://andytechnologies.github.io/',
+  site: 'https://pipweb.onrender.com/',
   integrations: [sitemap({
     i18n: {
       defaultLocale: 'es',
